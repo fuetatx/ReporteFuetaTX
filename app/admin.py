@@ -60,7 +60,7 @@ class RegistroForm(forms.ModelForm):
     receptor = forms.MultipleChoiceField(
         choices=REGISTRO_CHOICES_SIN_TODOS,
         widget=forms.CheckboxSelectMultiple,
-        required=True
+        required=False
     )
     
     class Meta:
@@ -87,6 +87,8 @@ class RegistroForm(forms.ModelForm):
             qs = qs.exclude(vin__in=usados)
 
         self.fields['triciclo'].queryset = qs
+        if instancia and instancia.pk and instancia.receptor:
+            self.initial['receptor'] = [r.strip() for r in instancia.receptor.split(',') if r.strip()]
 
     def clean_receptor(self):
         data = self.cleaned_data['receptor']
@@ -304,7 +306,7 @@ class PowerStationPanelInline(admin.TabularInline):
 @admin.register(power_station.Power_Station, site=mi_admin_site)
 class PowerAdmin(admin.ModelAdmin):
     list_display = [
-        "sn", "tipo", "w", "paneles", "expansiones", "bases", "fecha_armado",
+        "sn", "tipo", "dist", "dist_client", "paneles", "expansiones", "bases", "fecha_armado",
         "foto_url_display", "video_url_display"
     ]
 
@@ -321,7 +323,7 @@ class PowerAdmin(admin.ModelAdmin):
     video_url_display.short_description = "URL Video"
     readonly_fields = ["w", "paneles", "expansiones", "bases", "vendido", "fecha_v", "video_tag", "foto_tag"]
     fields = [
-        "sn",  "modelo", "marca", "dist", "tipo", "fecha_armado", "w", "paneles", "expansiones", "bases", "vendido", "fecha_v",
+        "sn",  "modelo", "marca", "dist", "dist_client", "tipo", "fecha_armado", "w", "paneles", "expansiones", "bases", "vendido", "fecha_v",
         "video", "video_tag", "foto", "foto_tag"
     ]
 
@@ -416,6 +418,13 @@ class RegistroAdmin(admin.ModelAdmin):
         if not obj or obj.llamada:
             readonly_fields.extend(['llamada', 'receptor'])
         return readonly_fields
+    
+    def delete_model(self, request, obj):
+        if obj.triciclo:
+            obj.triciclo.vendido = False
+            obj.triciclo.fecha_v = None
+            obj.triciclo.save()
+        super().delete_model(request, obj)
 
 
 
@@ -632,6 +641,9 @@ class CambioAceiteTricicloAdmin(admin.ModelAdmin):
         ('cliente', 'empresa'),
         'triciclo',
         'fecha',
+        'km300',
+        'km600',
+        'km1000',
         'kilometros',
         'foto', 'foto_tag',
         'comentario',
