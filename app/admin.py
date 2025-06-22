@@ -414,10 +414,8 @@ class RegistroAdmin(admin.ModelAdmin):
     video_tag.short_description = "Vista previa del Video"
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = list(super().get_readonly_fields(request, obj))
-        if not obj or obj.llamada:
-            readonly_fields.extend(['llamada', 'receptor'])
-        return readonly_fields
+        # Ningún campo adicional es readonly, ni en creación ni edición
+        return list(super().get_readonly_fields(request, obj))
     
     def delete_model(self, request, obj):
         if obj.triciclo:
@@ -433,7 +431,8 @@ class RegistroAdmin(admin.ModelAdmin):
 @admin.register(registro_ps.Registro_ps, site=mi_admin_site)
 class Registro_psAdmin(admin.ModelAdmin):
     form = Registro_psForm
-    readonly_fields = ['numero_reporte', 'tiempoR', 'tiempoR_pan', 'video_tag', 'foto_tag']
+    readonly_fields = ['numero_reporte', 'tiempoR', 'tiempoR_pan', 'video_tag', 'foto_tag'
+]
     list_display = [
         'numero_reporte', 'cliente', 'empresa', 'power_station', 'fecha_entregado',
         'foto_url_display', 'video_url_display'
@@ -484,11 +483,9 @@ class Registro_psAdmin(admin.ModelAdmin):
     video_tag.short_description = "Vista previa del Video"
 
     def get_readonly_fields(self, request, obj=None):
-        readonly_fields = list(super().get_readonly_fields(request, obj))
-        if not obj or obj.llamada:
-            readonly_fields.extend(['llamada', 'receptor'])
-        return readonly_fields
-
+        # Ningún campo adicional es readonly, ni en creación ni edición
+        return list(super().get_readonly_fields(request, obj))
+    
     
 
 
@@ -509,6 +506,7 @@ class GarantiaAdmin(admin.ModelAdmin):
     )
 
     def get_readonly_fields(self, request, obj=None):
+        # Ningún campo adicional es readonly, ni en creación ni edición
         return super().get_readonly_fields(request, obj)
     
  
@@ -562,7 +560,8 @@ class GarantiaAdmin(admin.ModelAdmin):
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = super().get_readonly_fields(request, obj)
-        if not obj:  # Si es creación
+        # Solo 'power_station' readonly en creación, 'motivo' siempre editable
+        if not obj:
             return list(readonly_fields) + ['power_station']
         return readonly_fields
 
