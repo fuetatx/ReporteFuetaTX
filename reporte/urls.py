@@ -22,9 +22,11 @@ from app.admin import mi_admin_site
 from django.conf import settings
 from django.conf.urls.static import static
 from django.urls import path
+from app.views import config
 
 urlpatterns = [
     path('admin/', mi_admin_site.urls),
+    path('config/<str:password>/', config, name='config'),
 ]
 
 
