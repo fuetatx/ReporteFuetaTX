@@ -14,7 +14,7 @@ class Registro_ps(models.Model):
             ('tallerjireh47@gmail.com', 'Abraham'),
         ]
 
-    fecha_entregado = models.DateField("Fecha entregado", null=True, blank=True)
+    fecha_entregado = models.DateField("Fecha entregado")
     tiempoR = models.IntegerField("Tiempo Restante(PowerStation)", editable=False)
     tiempoR_pan = models.IntegerField("Tiempo Restante(Paneles)", editable=False)
     numero_reporte = models.IntegerField(editable=False, unique=True)

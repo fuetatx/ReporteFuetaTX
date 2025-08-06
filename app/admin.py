@@ -174,10 +174,12 @@ class GarantiaForm(forms.ModelForm):
 @admin.register(cliente.Cliente, site=mi_admin_site)
 class ClienteAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'apellidos', 'carnet', 'direccion', 'email', 'telefono')
+    search_fields = ('nombre', 'apellidos', 'carnet', 'email', 'telefono')
 
 @admin.register(panels.Panels, site=mi_admin_site)
 class PanelsAdmin(admin.ModelAdmin):
     list_display = ('kit', 'aut', 'cuchilla', 'act', 'num')
+    search_fields = ('id', 'kit', 'num')
 
     def get_readonly_fields(self, request, obj=None):
         readonly_fields = list(super().get_readonly_fields(request, obj))
@@ -191,6 +193,7 @@ class PanelsAdmin(admin.ModelAdmin):
 @admin.register(empresa.Empresa, site=mi_admin_site)
 class EmpresaAdmin(admin.ModelAdmin):
     list_display = ('nombre', 'nit', 'direccion', 'email', 'telefono')
+    search_fields = ('nombre', 'nit', 'email', 'telefono')
 
 @admin.register(triciclo.Triciclo, site=mi_admin_site)
 class TricicloAdmin(admin.ModelAdmin):
@@ -321,6 +324,7 @@ class PowerAdmin(admin.ModelAdmin):
             return format_html('<a href="{}" target="_blank">{}</a>', obj.video.url, obj.video.url)
         return "-"
     video_url_display.short_description = "URL Video"
+    search_fields = ('sn', 'modelo', 'marca', 'tipo', 'dist', 'dist_client')
     readonly_fields = ["w", "paneles", "expansiones", "bases", "vendido", "fecha_v", "video_tag", "foto_tag"]
     fields = [
         "sn",  "modelo", "marca", "dist", "dist_client", "tipo", "fecha_armado", "w", "paneles", "expansiones", "bases", "vendido", "fecha_v",
@@ -368,6 +372,7 @@ class RegistroAdmin(admin.ModelAdmin):
         'numero_reporte', 'cliente', 'empresa', 'triciclo', 'fecha_entregado',
         'foto_url_display', 'video_url_display'
     ]
+    search_fields = ('numero_reporte', 'cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'triciclo__vin', 'triciclo__modelo')
     fieldsets = (
         ('Comprador', {
             'fields': (('cliente', 'empresa'),),
@@ -382,7 +387,18 @@ class RegistroAdmin(admin.ModelAdmin):
             'fields': ('fecha_entregado', 'numero_reporte', 'tiempoR'),
         }),
         ('Notificación', {
-            'fields': ('llamada', 'receptor'),
+            'fields': (
+                ('fallo', 'motor_1000w', 'motor_1200w', 'motor_1500w'),
+                ('cargador_bateria', 'baterias', 'caja_reguladora', 'diferencial'),
+                ('extensor_rango', 'problema_electrico', 'caja_luces'),
+                ('farol_delantero', 'farol_trasero'),
+                ('rodamientos_direccion', 'rodamientos_delanteros', 'rodamientos_traseros'),
+                ('bandas_freno', 'tubo_escape', 'tarjeta_extensor'),
+                ('panel_instrumentos', 'pulmon_stops', 'claxon'),
+                ('conmutadores', 'calso_extensor', 'llave_combustible'),
+                'otros',
+                'receptor'
+            ),
         }),
     )
 
@@ -437,6 +453,7 @@ class Registro_psAdmin(admin.ModelAdmin):
         'numero_reporte', 'cliente', 'empresa', 'power_station', 'fecha_entregado',
         'foto_url_display', 'video_url_display'
     ]
+    search_fields = ('numero_reporte', 'cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'power_station__sn', 'power_station__modelo')
     fieldsets = (
         ('Comprador', {
             'fields': (('cliente', 'empresa'),),
@@ -492,6 +509,7 @@ class Registro_psAdmin(admin.ModelAdmin):
 @admin.register(garantia.Garantia, site=mi_admin_site)
 class GarantiaAdmin(admin.ModelAdmin):
     form = GarantiaForm
+    search_fields = ('cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'triciclo__vin', 'power_station__sn', 'motivo', 'nombre_especialista')
     fieldsets = (
         ('Remitente', {
             'fields': (('cliente', 'empresa'),),
@@ -514,6 +532,7 @@ class GarantiaAdmin(admin.ModelAdmin):
 @admin.register(garantia_p.Garantia_P, site=mi_admin_site)
 class GarantiaAdmin(admin.ModelAdmin):
     readonly_fields = ['num']
+    search_fields = ('num', 'cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'power_station__sn')
     fieldsets = (
         ('Remitente', {
             'fields': (('cliente', 'empresa'),),

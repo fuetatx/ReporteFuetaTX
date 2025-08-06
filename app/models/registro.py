@@ -14,10 +14,37 @@ class Registro(models.Model):
             ('tallerjireh47@gmail.com', 'Abraham'),
         ]
 
-    fecha_entregado = models.DateField("Fecha entregado", null=True, blank=True)
+    fecha_entregado = models.DateField("Fecha entregado")
     tiempoR = models.IntegerField("Tiempo Restante", editable=False)
     numero_reporte = models.IntegerField(editable=False, unique=True)
-    llamada = models.TextField("Reportar por correo(Especificar motivo)", blank = True)
+    
+    # Campos para reportes por correo - checkboxes
+    fallo = models.BooleanField("Fallo", default=False)
+    motor_1000w = models.BooleanField("Motor de 1000w", default=False)
+    motor_1200w = models.BooleanField("Motor 1200w", default=False)
+    motor_1500w = models.BooleanField("Motor 1500w", default=False)
+    cargador_bateria = models.BooleanField("Cargador de batería", default=False)
+    baterias = models.BooleanField("Baterías", default=False)
+    caja_reguladora = models.BooleanField("Caja reguladora", default=False)
+    diferencial = models.BooleanField("Diferencial", default=False)
+    extensor_rango = models.BooleanField("Extensor de rango", default=False)
+    problema_electrico = models.BooleanField("Problema eléctrico", default=False)
+    caja_luces = models.BooleanField("Caja luces", default=False)
+    farol_delantero = models.BooleanField("Farol delantero", default=False)
+    farol_trasero = models.BooleanField("Farol trasero", default=False)
+    rodamientos_direccion = models.BooleanField("Rodamientos dirección", default=False)
+    rodamientos_delanteros = models.BooleanField("Rodamientos delanteros", default=False)
+    rodamientos_traseros = models.BooleanField("Rodamientos traseros", default=False)
+    bandas_freno = models.BooleanField("Bandas de freno", default=False)
+    tubo_escape = models.BooleanField("Tubo de escape", default=False)
+    tarjeta_extensor = models.BooleanField("Tarjeta del extensor", default=False)
+    panel_instrumentos = models.BooleanField("Panel de instrumentos", default=False)
+    pulmon_stops = models.BooleanField("Pulmón de stops", default=False)
+    claxon = models.BooleanField("Claxon", default=False)
+    conmutadores = models.BooleanField("Conmutadores", default=False)
+    calso_extensor = models.BooleanField("Calso del extensor", default=False)
+    llave_combustible = models.BooleanField("Llave de combustible", default=False)
+    otros = models.TextField("Otros (especificar)", blank=True, help_text="Especifica cualquier problema no listado arriba")
     cliente = models.ForeignKey(Cliente, null=True, blank=True, on_delete=models.SET_NULL, help_text = "Cliente a ser Reportado")
     empresa = models.ForeignKey(Empresa, null=True, blank=True, on_delete=models.SET_NULL, help_text = "Empresa a ser Reportada")
     triciclo = models.ForeignKey(Triciclo, null=True, blank=True, on_delete=models.SET_NULL)
@@ -35,6 +62,46 @@ class Registro(models.Model):
             return f"Venta: {self.numero_reporte} - {self.cliente}  -> {self.triciclo}"
         else:
             return f"Venta: {self.numero_reporte} - {self.empresa}  -> {self.triciclo}"
+
+    def get_problemas_reportados(self):
+        """Retorna una lista de los problemas seleccionados para el reporte."""
+        problemas = []
+        campos_problema = [
+            ('fallo', 'Fallo'),
+            ('motor_1000w', 'Motor de 1000w'),
+            ('motor_1200w', 'Motor 1200w'),
+            ('motor_1500w', 'Motor 1500w'),
+            ('cargador_bateria', 'Cargador de batería'),
+            ('baterias', 'Baterías'),
+            ('caja_reguladora', 'Caja reguladora'),
+            ('diferencial', 'Diferencial'),
+            ('extensor_rango', 'Extensor de rango'),
+            ('problema_electrico', 'Problema eléctrico'),
+            ('caja_luces', 'Caja luces'),
+            ('farol_delantero', 'Farol delantero'),
+            ('farol_trasero', 'Farol trasero'),
+            ('rodamientos_direccion', 'Rodamientos dirección'),
+            ('rodamientos_delanteros', 'Rodamientos delanteros'),
+            ('rodamientos_traseros', 'Rodamientos traseros'),
+            ('bandas_freno', 'Bandas de freno'),
+            ('tubo_escape', 'Tubo de escape'),
+            ('tarjeta_extensor', 'Tarjeta del extensor'),
+            ('panel_instrumentos', 'Panel de instrumentos'),
+            ('pulmon_stops', 'Pulmón de stops'),
+            ('claxon', 'Claxon'),
+            ('conmutadores', 'Conmutadores'),
+            ('calso_extensor', 'Calso del extensor'),
+            ('llave_combustible', 'Llave de combustible'),
+        ]
+        
+        for campo, etiqueta in campos_problema:
+            if getattr(self, campo, False):
+                problemas.append(etiqueta)
+                
+        if self.otros:
+            problemas.append(f"Otros: {self.otros}")
+            
+        return problemas
 
     def save(self, *args, **kwargs):
 

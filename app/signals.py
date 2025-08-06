@@ -14,11 +14,16 @@ def enviar_correo(instance, producto, comprador, destinatarios):
         for key, value in producto.__dict__.items() 
         if not key.startswith('_')
     ])
+    
+    # Obtener problemas reportados del nuevo sistema de checkboxes
+    problemas_reportados = instance.get_problemas_reportados()
+    motivo_reporte = "\n".join([f"- {problema}" for problema in problemas_reportados]) if problemas_reportados else "Sin problemas especificados"
+    
     subject = f"Reporte de Cliente: {comprador.nombre}"
     message = (
         f"Datos del Comprador:\n{comprador_data}\n\n"
         f"Datos del Producto:\n{producto_data}\n\n"
-        f"Motivo del Reporte: {instance.llamada}"
+        f"Problemas Reportados:\n{motivo_reporte}"
     )
     
     # Asegúrate de que 'from_email' esté configurado en settings o pásalo aquí
@@ -32,7 +37,9 @@ def enviar_correo(instance, producto, comprador, destinatarios):
 
 @receiver(post_save, sender=registro.Registro)
 def enviar_notificacion_registro(sender, instance, **kwargs):
-    if instance.llamada and instance.receptor:
+    # Verificar si hay problemas reportados y receptor configurado
+    problemas_reportados = instance.get_problemas_reportados()
+    if problemas_reportados and instance.receptor:
         destinatarios = instance.receptor.split(',')
 
         # Seleccionar comprador: debe ser cliente o empresa (según la validación en el formulario)
@@ -51,7 +58,16 @@ def enviar_notificacion_registro(sender, instance, **kwargs):
 
 @receiver(post_save, sender=registro_ps.Registro_ps)
 def enviar_notificacion_registro_ps(sender, instance, **kwargs):
-    if instance.llamada and instance.receptor:
+    # Verificar si hay problemas reportados y receptor configurado
+    # Para Registro_ps, verificamos si tiene el campo 'llamada' o el nuevo sistema
+    if hasattr(instance, 'get_problemas_reportados'):
+        problemas_reportados = instance.get_problemas_reportados()
+        condition = problemas_reportados and instance.receptor
+    else:
+        # Mantener compatibilidad con el campo anterior si existe
+        condition = getattr(instance, 'llamada', None) and instance.receptor
+        
+    if condition:
         destinatarios = instance.receptor.split(',')
 
         comprador = instance.cliente if instance.cliente else instance.empresa
