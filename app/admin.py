@@ -388,14 +388,6 @@ class RegistroAdmin(admin.ModelAdmin):
         }),
         ('Notificación', {
             'fields': (
-                ('fallo', 'motor_1000w', 'motor_1200w', 'motor_1500w'),
-                ('cargador_bateria', 'baterias', 'caja_reguladora', 'diferencial'),
-                ('extensor_rango', 'problema_electrico', 'caja_luces'),
-                ('farol_delantero', 'farol_trasero'),
-                ('rodamientos_direccion', 'rodamientos_delanteros', 'rodamientos_traseros'),
-                ('bandas_freno', 'tubo_escape', 'tarjeta_extensor'),
-                ('panel_instrumentos', 'pulmon_stops', 'claxon'),
-                ('conmutadores', 'calso_extensor', 'llave_combustible'),
                 'otros',
                 'receptor'
             ),
@@ -518,9 +510,54 @@ class GarantiaAdmin(admin.ModelAdmin):
             'fields': (('triciclo', 'power_station'),),
             'description': "Seleccione un producto después de guardar y elegir cliente/empresa."  # Texto descriptivo
         }),
-        ('Otros', {
-            'fields': ('motivo', 'evaluacion', 'trabajos_hechos', 'piezas_usadas', 'recomendaciones', 'nombre_especialista', 'conformidad_cliente'),
+        ('Datos', {
+            'fields': (
+                ('motivo', 'evaluacion', 'trabajos_hechos'),
+                'piezas_usadas', 
+            )
+        }),
+        ('Piezas usadas', {
+            'fields': (
+                (
+                    'tubo_escape',
+                    'tarjeta',
+                    'motor_1000w',
+                    'motor_1200w',
+                ),
+                (
+                    'motor_1500w',
+                    'cargador_bateria',
+                    'baterias',
+                    'caja_reguladora',
+                ),
+                (
+                    'diferencial',
+                    'extensor_rango',
+                    'problema_electrico',
+                    'caja_luces',
+                ),
+                (
+                    'farol_delantero',
+                    'farol_trasero',
+                    'rodamientos_direccion',
+                    'rodamientos_delanteros',
+                ),
+                (
+                    'rodamientos_traseros',
+                    'bandas_freno',
+                ),
+                'otros',
+            )
+            ,
+        }),
+        ('', {
+            'fields': (
+                'recomendaciones',
+                'nombre_especialista',
+                'conformidad_cliente'
+            )
         })
+        
     )
 
     def get_readonly_fields(self, request, obj=None):

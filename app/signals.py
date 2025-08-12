@@ -15,15 +15,14 @@ def enviar_correo(instance, producto, comprador, destinatarios):
         if not key.startswith('_')
     ])
     
-    # Obtener problemas reportados del nuevo sistema de checkboxes
     problemas_reportados = instance.get_problemas_reportados()
-    motivo_reporte = "\n".join([f"- {problema}" for problema in problemas_reportados]) if problemas_reportados else "Sin problemas especificados"
+    motivo_reporte = "\n".join([f"{problema}" for problema in problemas_reportados]) if problemas_reportados else "Sin problemas especificados"
     
     subject = f"Reporte de Cliente: {comprador.nombre}"
     message = (
         f"Datos del Comprador:\n{comprador_data}\n\n"
         f"Datos del Producto:\n{producto_data}\n\n"
-        f"Problemas Reportados:\n{motivo_reporte}"
+        f"Motivo:\n{motivo_reporte}"
     )
     
     # Asegúrate de que 'from_email' esté configurado en settings o pásalo aquí
