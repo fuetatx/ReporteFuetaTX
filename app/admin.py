@@ -439,8 +439,7 @@ class RegistroAdmin(admin.ModelAdmin):
 @admin.register(registro_ps.Registro_ps, site=mi_admin_site)
 class Registro_psAdmin(admin.ModelAdmin):
     form = Registro_psForm
-    readonly_fields = ['numero_reporte', 'tiempoR', 'tiempoR_pan', 'video_tag', 'foto_tag'
-]
+    readonly_fields = ['numero_reporte', 'tiempoR', 'tiempoR_pan', 'video_tag', 'foto_tag']
     list_display = [
         'numero_reporte', 'cliente', 'empresa', 'power_station', 'fecha_entregado',
         'foto_url_display', 'video_url_display'
@@ -501,6 +500,7 @@ class Registro_psAdmin(admin.ModelAdmin):
 @admin.register(garantia.Garantia, site=mi_admin_site)
 class GarantiaAdmin(admin.ModelAdmin):
     form = GarantiaForm
+    readonly_fields = ['foto_tag', 'video_tag']
     search_fields = ('cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'triciclo__vin', 'power_station__sn', 'motivo', 'nombre_especialista')
     fieldsets = (
         ('Remitente', {
@@ -545,6 +545,7 @@ class GarantiaAdmin(admin.ModelAdmin):
                 (
                     'rodamientos_traseros',
                     'bandas_freno',
+                    'claxon',
                 ),
                 'otros',
             )
@@ -556,18 +557,48 @@ class GarantiaAdmin(admin.ModelAdmin):
                 'nombre_especialista',
                 'conformidad_cliente'
             )
-        })
+        }),
+        ('Multimedia', {
+            'fields': (('foto', 'foto_tag'), ('video', 'video_tag')),
+        }),
         
     )
 
     def get_readonly_fields(self, request, obj=None):
-        # Ningún campo adicional es readonly, ni en creación ni edición
+        
         return super().get_readonly_fields(request, obj)
     
+    def foto_tag(self, obj):
+        if obj.foto:
+            return format_html('<img src="{}" width="200" />', obj.foto.url)
+        return "Sin imagen"
+    foto_tag.short_description = "Vista previa de Foto"
+
+    def video_tag(self, obj):
+        if obj.video:
+            return format_html(
+                '<video width="320" height="240" controls><source src="{}" type="video/mp4">Tu navegador no soporta video.</video>',
+                obj.video.url
+            )
+        return "Sin video"
+    video_tag.short_description = "Vista previa del Video"
+    
+    def foto_url_display(self, obj):
+        if obj.foto:
+            return format_html('<a href="{}" target="_blank">{}</a>', obj.foto.url, obj.foto.url)
+        return "-"
+    foto_url_display.short_description = "URL Foto"
+
+    def video_url_display(self, obj):
+        if obj.video:
+            return format_html('<a href="{}" target="_blank">{}</a>', obj.video.url, obj.video.url)
+        return "-"
+    video_url_display.short_description = "URL Video"
+   
  
 
 @admin.register(garantia_p.Garantia_P, site=mi_admin_site)
-class GarantiaAdmin(admin.ModelAdmin):
+class Garantia_PAdmin(admin.ModelAdmin):
     readonly_fields = ['num']
     search_fields = ('num', 'cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'power_station__sn')
     fieldsets = (

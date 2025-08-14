@@ -12,7 +12,7 @@ class Panels(models.Model):
         ('no', 'No')
     ]
 
-    id = models.CharField("ID", primary_key = True)
+    id = models.CharField("ID", primary_key = True, max_length=255)
     kit = models.CharField("Kit de Montaje", max_length = 255)
     aut = models.BooleanField("Kit Autorizado", default = False, help_text="El kit se autorizara solo por el encargado de ello")
     cuchilla = models.CharField("Cuchilla", choices = TIPO_C, max_length = 255)
