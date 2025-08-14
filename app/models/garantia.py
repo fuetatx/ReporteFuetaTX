@@ -52,8 +52,8 @@ class Garantia(models.Model):
     nombre_especialista=models.CharField("Especialista encargado", choices=ESPEC, max_length=255)
     conformidad_cliente=models.BooleanField("Conformidad del cliente")
 
-    video = models.FileField("Video", upload_to="ventas/videos/", blank=True, null=True)
-    foto = models.ImageField("Foto", upload_to="ventas/fotos/", blank=True, null=True)
+    video = models.FileField("Video", upload_to="garantia/videos/", blank=True, null=True)
+    foto = models.ImageField("Foto", upload_to="garantia/fotos/", blank=True, null=True)
 
     def __str__(self):
         if self.cliente:
