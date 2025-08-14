@@ -7,7 +7,7 @@ from .power_station import Power_Station
 from django.db.models.signals import pre_save
 
 class Garantia_P(models.Model):
-    num = models.CharField("Numero de Garantia", primary_key=True, help_text="Se genera automaticamente y es secuencial en el formato PS###/YYYY")
+    num = models.CharField("Numero de Garantia", primary_key=True, help_text="Se genera automaticamente y es secuencial en el formato PS###/YYYY", max_length=255)
     fecha_em = models.DateField("Fecha de Emision", default=date.today())
     cliente = models.ForeignKey(Cliente, null=True, blank=True, on_delete=models.SET_NULL)
     empresa = models.ForeignKey(Empresa, null=True, blank=True, on_delete=models.SET_NULL)

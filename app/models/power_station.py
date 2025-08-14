@@ -26,7 +26,7 @@ class Power_Station(models.Model):
     expansiones = models.IntegerField("Expansiones", editable=False)
     bases = models.IntegerField("Bases de Paneles", editable=False)
     modelo = models.CharField("Modelo", max_length=255, default="Longi", help_text="Modelo por defecto de las Power_Stations")
-    marca = models.CharField("Marca", default="Perro Rojo", help_text="Marca por defecto de las Power_Stations")
+    marca = models.CharField("Marca", default="Perro Rojo", help_text="Marca por defecto de las Power_Stations", max_length=255)
     dist = models.CharField("Ditribuidora/Tienda", max_length = 255, choices=DISTRIBUIDORA_CHOICES)
     dist_client = models.CharField("Cliente de Distribuidora", max_length=255, default="")
     vendido = models.BooleanField("Vendido", default=False, help_text="Cuando se realice una relacion de venta de power station se vera reflejado aqui")

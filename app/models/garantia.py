@@ -45,11 +45,15 @@ class Garantia(models.Model):
     rodamientos_delanteros = models.BooleanField("Rodamientos delanteros", default=False)
     rodamientos_traseros = models.BooleanField("Rodamientos traseros", default=False)
     bandas_freno = models.BooleanField("Bandas de freno", default=False)
+    claxon = models.BooleanField("Claxon", default=False)
     otros = models.TextField("Otros", blank=True, help_text="Especifica otra pieza no listada")
 
     recomendaciones=models.TextField("Algunas recomendaciones", max_length=255)
     nombre_especialista=models.CharField("Especialista encargado", choices=ESPEC, max_length=255)
     conformidad_cliente=models.BooleanField("Conformidad del cliente")
+
+    video = models.FileField("Video", upload_to="ventas/videos/", blank=True, null=True)
+    foto = models.ImageField("Foto", upload_to="ventas/fotos/", blank=True, null=True)
 
     def __str__(self):
         if self.cliente:
