@@ -512,6 +512,7 @@ class GarantiaAdmin(admin.ModelAdmin):
         }),
         ('Datos', {
             'fields': (
+                'fecha_creacion',
                 ('motivo', 'evaluacion', 'trabajos_hechos'),
                 'piezas_usadas', 
             )

@@ -22,6 +22,7 @@ class Garantia(models.Model):
     empresa = models.ForeignKey(Empresa, null=True, blank=True, on_delete=models.SET_NULL)
     triciclo = models.ForeignKey(Triciclo, null=True, blank=True, on_delete=models.SET_NULL)
     power_station = models.ForeignKey(Power_Station, null=True, blank=True, on_delete=models.SET_NULL)
+    fecha_creacion = models.DateField("Fecha de creación", blank=True, null=True, default=None)
     motivo=models.TextField("Motivo", max_length=255)
     evaluacion=models.TextField("Evaluacion resumen", max_length=255)
     trabajos_hechos=models.TextField("Trabajos realizados", max_length=255)
