@@ -16,6 +16,12 @@ from django.forms.models import BaseInlineFormSet
 from django.db.models import Q
 from django.utils.html import format_html
 
+try:
+    from admin_interface.models import Theme
+    ADMIN_INTERFACE_AVAILABLE = True
+except ImportError:
+    ADMIN_INTERFACE_AVAILABLE = False
+
 
 
 class MiAdminSite(admin.AdminSite):
@@ -42,6 +48,12 @@ class MiAdminSite(admin.AdminSite):
                 {'name': 'Usuarios', 'admin_url': '/admin/auth/user/'},
                 {'name': 'Grupos', 'admin_url': '/admin/auth/group/'},
             ]},
+            {
+                'name': 'Admin Interface',
+                'models': [
+                    {'name': 'Themes', 'admin_url': '/admin/admin_interface/theme/'},
+            ]
+            },
         ]
         return orden_aplicaciones
 
@@ -51,6 +63,9 @@ mi_admin_site.site_title = 'Administracion'
 mi_admin_site.index_title = 'Bienvenido al administrador de Empresa'
 mi_admin_site.register(User, UserAdmin)
 mi_admin_site.register(Group, GroupAdmin)
+
+if ADMIN_INTERFACE_AVAILABLE:
+    mi_admin_site.register(Theme)
 
 REGISTRO_CHOICES_SIN_TODOS = [
     choice for choice in registro.Registro.RECEPTOR_CHOICES if choice[0] != 'sales07@fuetasa.com'
