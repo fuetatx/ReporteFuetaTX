@@ -1,4 +1,4 @@
-from datetime import date
+from datetime import date, timedelta
 from django.db import models
 from django.dispatch import receiver
 from django.db.models.signals import pre_save
@@ -13,9 +13,16 @@ class Registro(models.Model):
             ('pino.isaac27@gmail.com', 'Isaac'),
             ('tallerjireh47@gmail.com', 'Abraham'),
         ]
+    
+    GARANTY_TYPE = [
+        (362, '362 días'),
+        (180, '180 días')
+    ]
 
     fecha_entregado = models.DateField("Fecha entregado")
-    tiempoR = models.IntegerField("Tiempo Restante", editable=False)
+    tipo_garantia = models.IntegerField("Tipo de garantia", choices=GARANTY_TYPE, default=0)
+    fecha_v_garantia = models.DateField("Fecha de vencimiento de garantia", default=None, null=True, blank=True, editable=False)
+    tiempoR = models.IntegerField("Tiempo Restante", help_text="Deprecado en nuevos registros", editable=False)
     numero_reporte = models.IntegerField(editable=False, unique=True)    
     otros = models.TextField("Motivo", blank=True, help_text="Especifica problema")
     cliente = models.ForeignKey(Cliente, null=True, blank=True, on_delete=models.SET_NULL, help_text = "Cliente a ser Reportado")
@@ -47,7 +54,10 @@ class Registro(models.Model):
 
         if not self.pk:
             dias_transcurridos = (date.today() - self.fecha_entregado).days
-            self.tiempoR = max(0, 365 - dias_transcurridos) 
+            self.tiempoR = max(0, 365 - dias_transcurridos)
+            
+            self.fecha_v_garantia = self.fecha_entregado + timedelta(days=self.tipo_garantia)
+
         super().save(*args, **kwargs)
 
     class Meta:
