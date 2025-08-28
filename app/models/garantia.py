@@ -23,9 +23,9 @@ class Garantia(models.Model):
     triciclo = models.ForeignKey(Triciclo, null=True, blank=True, on_delete=models.SET_NULL)
     power_station = models.ForeignKey(Power_Station, null=True, blank=True, on_delete=models.SET_NULL)
     fecha_creacion = models.DateField("Fecha de creación", blank=True, null=True, default=None)
-    motivo=models.TextField("Motivo", max_length=255)
-    evaluacion=models.TextField("Evaluacion resumen", max_length=255)
-    trabajos_hechos=models.TextField("Trabajos realizados", max_length=255)
+    motivo=models.TextField("Motivo", max_length=255, blank=True, null=True)
+    evaluacion=models.TextField("Evaluacion resumen", max_length=255, blank=True, null=True)
+    trabajos_hechos=models.TextField("Trabajos realizados", max_length=255, blank=True, null=True)
     piezas_usadas=models.TextField("Lista de piezas usadas", null=True, blank=True, max_length=255)
 
     tubo_escape = models.BooleanField("Tubo de escape", default=False)
@@ -49,7 +49,7 @@ class Garantia(models.Model):
     claxon = models.BooleanField("Claxon", default=False)
     otros = models.TextField("Otros", blank=True, help_text="Especifica otra pieza no listada")
 
-    recomendaciones=models.TextField("Algunas recomendaciones", max_length=255)
+    recomendaciones=models.TextField("Algunas recomendaciones", max_length=255, null=True, blank=True)
     nombre_especialista=models.CharField("Especialista encargado", choices=ESPEC, max_length=255)
     conformidad_cliente=models.BooleanField("Conformidad del cliente")
 
