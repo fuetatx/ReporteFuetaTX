@@ -1,3 +1,4 @@
+from datetime import date
 from django.utils.html import format_html
 from .models.cambio_aceite_triciclo import CambioAceiteTriciclo
 from django.contrib import admin
@@ -184,7 +185,38 @@ class GarantiaForm(forms.ModelForm):
                 if field in self.fields:  # ¡Verificar si el campo existe!
                     self.fields[field].disabled = True
                     self.fields[field].help_text = "Guarde primero después de seleccionar cliente/empresa."
-
+        else:
+            if instance.cliente:
+                # Filtrar triciclos por cliente
+                registros_cliente = registro.Registro.objects.filter(
+                    cliente=instance.cliente, 
+                    triciclo__isnull=False
+                ).values_list('triciclo__vin', flat=True)
+                
+                if registros_cliente:
+                    self.fields['triciclo'].queryset = triciclo.Triciclo.objects.filter(
+                        vin__in=registros_cliente
+                    )
+                    self.fields['triciclo'].help_text = f"Triciclos vendidos a: {instance.cliente.nombre} {instance.cliente.apellidos}"
+                else:
+                    self.fields['triciclo'].queryset = triciclo.Triciclo.objects.none()
+                    self.fields['triciclo'].help_text = "Este cliente no tiene triciclos registrados"
+            
+            elif instance.empresa:
+                # Filtrar triciclos por empresa
+                registros_empresa = registro.Registro.objects.filter(
+                    empresa=instance.empresa,
+                    triciclo__isnull=False
+                ).values_list('triciclo__vin', flat=True)
+                
+                if registros_empresa:
+                    self.fields['triciclo'].queryset = triciclo.Triciclo.objects.filter(
+                        vin__in=registros_empresa
+                    )
+                    self.fields['triciclo'].help_text = f"Triciclos vendidos a: {instance.empresa.nombre}"
+                else:
+                    self.fields['triciclo'].queryset = triciclo.Triciclo.objects.none()
+                    self.fields['triciclo'].help_text = "Esta empresa no tiene triciclos registrados"    
 
 @admin.register(cliente.Cliente, site=mi_admin_site)
 class ClienteAdmin(admin.ModelAdmin):
@@ -382,7 +414,7 @@ class PowerAdmin(admin.ModelAdmin):
 @admin.register(registro.Registro, site=mi_admin_site)
 class RegistroAdmin(admin.ModelAdmin):
     form = RegistroForm
-    readonly_fields = ['numero_reporte', 'tiempoR', 'video_tag', 'foto_tag']
+    readonly_fields = ['numero_reporte', 'tiempoR', 'video_tag', 'foto_tag', 'fecha_v_garantia', 'dias_restantes']
     list_display = [
         'numero_reporte', 'cliente', 'empresa', 'triciclo', 'fecha_entregado',
         'foto_url_display', 'video_url_display'
@@ -395,11 +427,11 @@ class RegistroAdmin(admin.ModelAdmin):
         ('Producto', {
             'fields': (('triciclo'),),
         }),
+        ('Garantía', {
+            'fields': (('fecha_entregado'), ('numero_reporte'), ('tipo_garantia'), ('fecha_v_garantia', 'dias_restantes'), ('tiempoR')),
+        }),
         ('Multimedia de la venta', {
             'fields': (('foto', 'foto_tag'), ('video', 'video_tag')),
-        }),
-        ('Otros', {
-            'fields': ('fecha_entregado', 'numero_reporte', 'tiempoR'),
         }),
         ('Notificación', {
             'fields': (
@@ -436,9 +468,21 @@ class RegistroAdmin(admin.ModelAdmin):
         return "Sin video"
     video_tag.short_description = "Vista previa del Video"
 
+    def dias_restantes(self, obj):
+        if obj.fecha_v_garantia:
+            dias_restantes = (obj.fecha_v_garantia - date.today()).days
+            return max(0, dias_restantes)
+        return 0
+    dias_restantes.short_description = "Días Restantes"
+
     def get_readonly_fields(self, request, obj=None):
-        # Ningún campo adicional es readonly, ni en creación ni edición
-        return list(super().get_readonly_fields(request, obj))
+
+        readonly_fields = list(super().get_readonly_fields(request, obj))
+        if obj:
+            readonly_fields.append('tipo_garantia')
+
+        return readonly_fields
+
     
     def delete_model(self, request, obj):
         if obj.triciclo:
