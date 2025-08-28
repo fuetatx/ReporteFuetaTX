@@ -15,8 +15,8 @@ class Registro(models.Model):
         ]
     
     GARANTY_TYPE = [
-        (362, '362 días'),
-        (180, '180 días')
+        (365, '1 año'),
+        (180, '6 meses')
     ]
 
     fecha_entregado = models.DateField("Fecha entregado")

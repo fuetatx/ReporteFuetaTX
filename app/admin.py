@@ -185,7 +185,38 @@ class GarantiaForm(forms.ModelForm):
                 if field in self.fields:  # ¡Verificar si el campo existe!
                     self.fields[field].disabled = True
                     self.fields[field].help_text = "Guarde primero después de seleccionar cliente/empresa."
-
+        else:
+            if instance.cliente:
+                # Filtrar triciclos por cliente
+                registros_cliente = registro.Registro.objects.filter(
+                    cliente=instance.cliente, 
+                    triciclo__isnull=False
+                ).values_list('triciclo__vin', flat=True)
+                
+                if registros_cliente:
+                    self.fields['triciclo'].queryset = triciclo.Triciclo.objects.filter(
+                        vin__in=registros_cliente
+                    )
+                    self.fields['triciclo'].help_text = f"Triciclos vendidos a: {instance.cliente.nombre} {instance.cliente.apellidos}"
+                else:
+                    self.fields['triciclo'].queryset = triciclo.Triciclo.objects.none()
+                    self.fields['triciclo'].help_text = "Este cliente no tiene triciclos registrados"
+            
+            elif instance.empresa:
+                # Filtrar triciclos por empresa
+                registros_empresa = registro.Registro.objects.filter(
+                    empresa=instance.empresa,
+                    triciclo__isnull=False
+                ).values_list('triciclo__vin', flat=True)
+                
+                if registros_empresa:
+                    self.fields['triciclo'].queryset = triciclo.Triciclo.objects.filter(
+                        vin__in=registros_empresa
+                    )
+                    self.fields['triciclo'].help_text = f"Triciclos vendidos a: {instance.empresa.nombre}"
+                else:
+                    self.fields['triciclo'].queryset = triciclo.Triciclo.objects.none()
+                    self.fields['triciclo'].help_text = "Esta empresa no tiene triciclos registrados"    
 
 @admin.register(cliente.Cliente, site=mi_admin_site)
 class ClienteAdmin(admin.ModelAdmin):
