@@ -16,6 +16,7 @@ class Power_Station(models.Model):
     ('donki', 'Donki'),
     ('fueta', 'Fueta'),
     ('mkl', 'MKL'),
+    ('slf', 'Solifoam')
 ]
     
     sn = models.CharField("ID", max_length=255, primary_key=True)
