@@ -32,7 +32,8 @@ class Triciclo(models.Model):
     fecha_v = models.DateField("Fecha de Venta", default=None, null=True, blank=True, help_text="Al marcarse como vendido un triciclo la fecha se actualiza")
     video = models.FileField("Video", upload_to="videos/", blank=True, null=True, help_text="Video del armado del triciclo")
     imagen = models.ImageField("Imagen", upload_to="imagenes/", blank=True, null=True, help_text="Imagen del triciclo armado")
-
+    bateria_id = models.CharField("Batería ID", max_length=255, null=True, blank=True)
+    bateria_capacidad = models.CharField("Batería Capacidad", max_length=255, null=True, blank=True)
 
     def __str__(self):
         return f"VIN: {self.vin} - Modelo: {self.modelo} - #Motor: {self.num_m}"
