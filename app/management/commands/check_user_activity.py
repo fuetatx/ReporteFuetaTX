@@ -31,129 +31,142 @@ class Command(BaseCommand):
         # Fecha límite 
         limite_fecha = timezone.now() - timedelta(hours=horas)
         
-        # Obtener usuarios que han tenido actividad reciente
-        usuarios_activos = LogEntry.objects.filter(
-            action_time__gte=limite_fecha
-        ).values_list('user_id', flat=True).distinct()
-        
-        # Obtener todos los usuarios staff (que deberían usar el admin)
-        usuarios_staff = User.objects.filter(
-            is_staff=True,
-            is_active=True
-        ).exclude(is_superuser=True)  # Excluir superusuarios
-        
-        # Usuarios sin actividad
-        usuarios_sin_actividad = usuarios_staff.exclude(
-            id__in=usuarios_activos
+        # Obtener TODOS los usuarios excepto superusuarios
+        todos_usuarios = User.objects.filter(
+            is_superuser=False
         )
         
-        self.stdout.write(f'Total usuarios staff activos: {usuarios_staff.count()}')
-        self.stdout.write(f'Usuarios con actividad reciente: {len(usuarios_activos)}')
-        self.stdout.write(f'Usuarios sin actividad: {usuarios_sin_actividad.count()}')
+        usuarios_con_actividad = []
+        usuarios_sin_actividad = []
         
-        # SIEMPRE ENVIAR REPORTE (modificado)
+        for usuario in todos_usuarios:
+            ultima_actividad = LogEntry.objects.filter(
+                user=usuario
+            ).order_by('-action_time').first()
+            
+            nombre_completo = usuario.get_full_name() or "Sin nombre"
+            
+            if ultima_actividad:
+                fecha_ultima = ultima_actividad.action_time
+                
+                info_usuario = {
+                    'username': usuario.username,
+                    'nombre': nombre_completo,
+                    'ultima_actividad': fecha_ultima,
+                    'fecha_formateada': fecha_ultima.strftime('%d/%m/%Y %H:%M')
+                }
+                
+                # Verificar si la actividad fue antes o después de las últimas X horas
+                if fecha_ultima >= limite_fecha:
+                    usuarios_con_actividad.append(info_usuario)
+                else:
+                    usuarios_sin_actividad.append(info_usuario)
+            else:
+                # Usuario sin ninguna actividad registrada
+                info_usuario = {
+                    'username': usuario.username,
+                    'nombre': nombre_completo,
+                    'ultima_actividad': None,
+                    'fecha_formateada': 'Nunca'
+                }
+                usuarios_sin_actividad.append(info_usuario)
+        
+        self.stdout.write(f'Total usuarios (sin superusuarios): {todos_usuarios.count()}')
+        self.stdout.write(f'Usuarios con actividad reciente: {len(usuarios_con_actividad)}')
+        self.stdout.write(f'Usuarios sin actividad reciente: {len(usuarios_sin_actividad)}')
+        
         if modo_prueba:
-            self.mostrar_reporte_consola(usuarios_sin_actividad, usuarios_staff, horas)
+            self.mostrar_reporte_consola(usuarios_con_actividad, usuarios_sin_actividad, horas)
         else:
-            self.enviar_reporte(usuarios_sin_actividad, usuarios_staff, horas)
+            self.enviar_reporte(usuarios_con_actividad, usuarios_sin_actividad, horas)
         
-        if usuarios_sin_actividad.exists():
-            self.stdout.write(
-                self.style.WARNING(
-                    f'Se encontraron {usuarios_sin_actividad.count()} usuarios sin actividad'
-                )
-            )
-        else:
-            self.stdout.write(
-                self.style.SUCCESS('Todos los usuarios han tenido actividad reciente')
-            )
+        self.stdout.write(self.style.SUCCESS('Reporte generado exitosamente'))
 
-    def mostrar_reporte_consola(self, usuarios_inactivos, usuarios_staff, horas):
+    def mostrar_reporte_consola(self, usuarios_activos, usuarios_inactivos, horas):
         """Muestra el reporte en la consola para pruebas"""
         self.stdout.write(self.style.WARNING('\n=== REPORTE DE ACTIVIDAD (MODO PRUEBA) ==='))
         self.stdout.write(f'Período: Últimas {horas} horas')
         self.stdout.write(f'Fecha de verificación: {timezone.now().strftime("%d/%m/%Y %H:%M")}')
-        self.stdout.write(f'Total usuarios staff: {usuarios_staff.count()}')
-        self.stdout.write(f'Usuarios sin actividad: {usuarios_inactivos.count()}')
         
-        if usuarios_inactivos.exists():
-            self.stdout.write('\nUsuarios sin actividad:')
-            for usuario in usuarios_inactivos:
-                ultima_actividad = LogEntry.objects.filter(
-                    user=usuario
-                ).order_by('-action_time').first()
-                
-                fecha_ultima = "Nunca" if not ultima_actividad else ultima_actividad.action_time.strftime('%d/%m/%Y %H:%M')
-                
+        self.stdout.write(self.style.SUCCESS(f'\n✅ USUARIOS CON ACTIVIDAD RECIENTE ({len(usuarios_activos)}):'))
+        if usuarios_activos:
+            for usuario in usuarios_activos:
                 self.stdout.write(
-                    f"- {usuario.get_full_name() or usuario.username} "
-                    f"(Usuario: {usuario.username}) - Última actividad: {fecha_ultima}"
+                    f"- Usuario: {usuario['username']} | "
+                    f"Nombre: {usuario['nombre']} | "
+                    f"Última actividad: {usuario['fecha_formateada']}"
                 )
         else:
-            self.stdout.write(self.style.SUCCESS('\n✅ Todos los usuarios han tenido actividad reciente'))
-
-    def enviar_reporte(self, usuarios_inactivos, usuarios_staff, horas):
-        """Envía el reporte por correo a los administradores - SIEMPRE"""
+            self.stdout.write('  (Ninguno)')
         
-        if usuarios_inactivos.exists():
-            # Hay usuarios inactivos - reporte de alerta
-            usuarios_lista = []
+        self.stdout.write(self.style.WARNING(f'\n⚠️ USUARIOS SIN ACTIVIDAD RECIENTE ({len(usuarios_inactivos)}):'))
+        if usuarios_inactivos:
             for usuario in usuarios_inactivos:
-                ultima_actividad = LogEntry.objects.filter(
-                    user=usuario
-                ).order_by('-action_time').first()
-                
-                fecha_ultima = "Nunca" if not ultima_actividad else ultima_actividad.action_time.strftime('%d/%m/%Y %H:%M')
-                
-                usuarios_lista.append(
-                    f"- {usuario.get_full_name() or usuario.username} "
-                    f"(Usuario: {usuario.username}) - Última actividad: {fecha_ultima}"
+                self.stdout.write(
+                    f"- Usuario: {usuario['username']} | "
+                    f"Nombre: {usuario['nombre']} | "
+                    f"Última actividad: {usuario['fecha_formateada']}"
                 )
-            
-            mensaje = f"""
-⚠️ REPORTE DE ACTIVIDAD - USUARIOS INACTIVOS DETECTADOS
-
-Período verificado: Últimas {horas} horas
-
-USUARIOS SIN ACTIVIDAD:
-{chr(10).join(usuarios_lista)}
-
-RESUMEN:
-- Total de usuarios staff: {usuarios_staff.count()}
-- Usuarios inactivos: {len(usuarios_lista)}
-- Usuarios activos: {usuarios_staff.count() - len(usuarios_lista)}
-
-NOTA: Este reporte incluye solo usuarios con permisos de staff que deberían tener actividad regular en el sistema.
-
----
-Sistema de administración de FuetaTX - Reporte automático
-            """
-            
-            asunto = f'⚠️ ALERTA: {usuarios_inactivos.count()} usuarios inactivos ({horas}h)'
-            
         else:
-            # No hay usuarios inactivos - reporte de confirmación
-            mensaje = f"""
-✅ REPORTE DE ACTIVIDAD - TODOS LOS USUARIOS ACTIVOS
+            self.stdout.write('  (Ninguno)')
+
+    def enviar_reporte(self, usuarios_activos, usuarios_inactivos, horas):
+        """Envía el reporte por correo a los administradores"""
+        
+        # Construir lista de usuarios activos
+        lista_activos = []
+        for usuario in usuarios_activos:
+            lista_activos.append(
+                f"- Usuario: {usuario['username']} | "
+                f"Nombre: {usuario['nombre']} | "
+                f"Última actividad: {usuario['fecha_formateada']}"
+            )
+        
+        # Construir lista de usuarios inactivos
+        lista_inactivos = []
+        for usuario in usuarios_inactivos:
+            lista_inactivos.append(
+                f"- Usuario: {usuario['username']} | "
+                f"Nombre: {usuario['nombre']} | "
+                f"Última actividad: {usuario['fecha_formateada']}"
+            )
+        
+        mensaje = f"""
+REPORTE DE ACTIVIDAD DE USUARIOS
 
 Período verificado: Últimas {horas} horas
+Fecha de verificación: {timezone.now().strftime('%d/%m/%Y %H:%M')}
 
-RESULTADO: Todos los usuarios staff han tenido actividad reciente en el sistema.
+{'='*60}
+
+✅ USUARIOS CON ACTIVIDAD RECIENTE ({len(usuarios_activos)}):
+{chr(10).join(lista_activos) if lista_activos else '  (Ninguno)'}
+
+{'='*60}
+
+⚠️ USUARIOS SIN ACTIVIDAD RECIENTE ({len(usuarios_inactivos)}):
+{chr(10).join(lista_inactivos) if lista_inactivos else '  (Ninguno)'}
+
+{'='*60}
 
 RESUMEN:
-- Total de usuarios staff monitoreados: {usuarios_staff.count()}
-- Usuarios con actividad reciente: {usuarios_staff.count()}
-- Usuarios sin actividad: 0
+- Total de usuarios monitoreados: {len(usuarios_activos) + len(usuarios_inactivos)}
+- Usuarios con actividad reciente: {len(usuarios_activos)}
+- Usuarios sin actividad reciente: {len(usuarios_inactivos)}
 
-NOTA: Este reporte se envía diariamente para confirmar que el sistema de monitoreo está funcionando correctamente.
+NOTA: Este reporte excluye únicamente a los superusuarios.
 
 ---
 Sistema de administración de FuetaTX - Reporte automático
-            """
-            
-            asunto = f'✅ Reporte Diario: Todos los usuarios activos ({horas}h)'
+        """
         
-        # Enviar correo a los administradores
+        # Determinar asunto según situación
+        if usuarios_inactivos:
+            asunto = f'⚠️ Reporte de Actividad: {len(usuarios_inactivos)} usuarios inactivos en {horas}h'
+        else:
+            asunto = f'✅ Reporte de Actividad: Todos los usuarios activos en {horas}h'
+        
+        # Enviar correo
         destinatarios = ['darioroque20033@gmail.com']
         
         try:
