@@ -337,6 +337,7 @@ class PowerStationPanelInlineFormset(BaseInlineFormSet):
 class PowerStationPanelInline(admin.TabularInline):
     model = power_station.PowerStationPanel
     formset = PowerStationPanelInlineFormset
+    autocomplete_fields = ['panel']
     extra = 3  # Máximo necesario
     verbose_name = "Panel"
     verbose_name_plural = "Paneles"
@@ -414,6 +415,7 @@ class PowerAdmin(admin.ModelAdmin):
 @admin.register(registro.Registro, site=mi_admin_site)
 class RegistroAdmin(admin.ModelAdmin):
     form = RegistroForm
+    autocomplete_fields = ['cliente', 'empresa', 'triciclo']
     readonly_fields = ['numero_reporte', 'tiempoR', 'video_tag', 'foto_tag', 'fecha_v_garantia', 'dias_restantes']
     list_display = [
         'numero_reporte', 'cliente', 'empresa', 'triciclo', 'fecha_entregado',
@@ -498,6 +500,7 @@ class RegistroAdmin(admin.ModelAdmin):
 @admin.register(registro_ps.Registro_ps, site=mi_admin_site)
 class Registro_psAdmin(admin.ModelAdmin):
     form = Registro_psForm
+    autocomplete_fields = ['cliente', 'empresa', 'power_station']
     readonly_fields = ['numero_reporte', 'tiempoR', 'tiempoR_pan', 'video_tag', 'foto_tag']
     list_display = [
         'numero_reporte', 'cliente', 'empresa', 'power_station', 'fecha_entregado',
@@ -559,6 +562,7 @@ class Registro_psAdmin(admin.ModelAdmin):
 @admin.register(garantia.Garantia, site=mi_admin_site)
 class GarantiaAdmin(admin.ModelAdmin):
     form = GarantiaForm
+    autocomplete_fields = ['cliente', 'empresa', 'triciclo', 'power_station']
     readonly_fields = ['foto_tag', 'video_tag']
     search_fields = ('cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'triciclo__vin', 'power_station__sn', 'motivo', 'nombre_especialista')
     fieldsets = (
@@ -659,6 +663,7 @@ class GarantiaAdmin(admin.ModelAdmin):
 
 @admin.register(garantia_p.Garantia_P, site=mi_admin_site)
 class Garantia_PAdmin(admin.ModelAdmin):
+    autocomplete_fields = ['cliente', 'empresa', 'power_station']
     readonly_fields = ['num']
     search_fields = ('num', 'cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'power_station__sn')
     fieldsets = (
@@ -809,4 +814,4 @@ class CambioAceiteTricicloAdmin(admin.ModelAdmin):
         return "Sin imagen"
     foto_tag.short_description = "Vista previa de Foto"
 
-    autocomplete_fields = ['triciclo']
+    autocomplete_fields = ['cliente', 'empresa', 'triciclo']
