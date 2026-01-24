@@ -263,7 +263,7 @@ class TricicloAdmin(admin.ModelAdmin):
     video_url_display.short_description = "URL Video"
     search_fields = ('autorizado', 'fecha_autorizado', 'vin', 'modelo', 'num_m')
     fields = [
-        "vin", "modelo", "fecha_armado", "num_m", "extensor_rango", "sello", "bateria_id", "bateria_capacidad",
+        "vin", "modelo", "fecha_armado", "num_m", "extensor_rango", "sello", "bateria_id", "bateria_capacidad", "bateria_fecha_fabricacion",
         "fecha_autorizado", "autorizado", "obser", "vendido", "fecha_v",
         "video", "video_tag", "imagen", "imagen_tag"
     ]

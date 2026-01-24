@@ -34,6 +34,7 @@ class Triciclo(models.Model):
     imagen = models.ImageField("Imagen", upload_to="imagenes/", blank=True, null=True, help_text="Imagen del triciclo armado")
     bateria_id = models.CharField("Batería ID", max_length=255, null=True, blank=True)
     bateria_capacidad = models.CharField("Batería Capacidad", max_length=255, null=True, blank=True)
+    bateria_fecha_fabricacion = models.DateField("Bateria Fecha de Fabricación", null=True, blank=True)
 
     def __str__(self):
         return f"VIN: {self.vin} - Modelo: {self.modelo} - #Motor: {self.num_m}"
