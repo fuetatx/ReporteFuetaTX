@@ -250,6 +250,54 @@ class TricicloAdmin(admin.ModelAdmin):
         "imagen_url_display", "video_url_display"
     ]
 
+    def get_search_results(self, request, queryset, search_term):
+            queryset, use_distinct = super().get_search_results(request, queryset, search_term)
+            
+            app_label = request.GET.get('app_label')
+            model_name = request.GET.get('model_name')
+            
+            # Filtro para autocomplete desde RegistroAdmin
+            if app_label == 'app' and model_name == 'registro':
+                queryset = queryset.filter(vendido=False)
+                usados_pks = registro.Registro.objects.filter(triciclo__isnull=False).values_list('triciclo_id', flat=True)
+                queryset = queryset.exclude(pk__in=usados_pks)
+            
+            # Filtro para autocomplete desde GarantiaAdmin
+            elif app_label == 'app' and model_name == 'garantia':  # Ajusta el nombre de tu app
+                # Obtener el ID de la garantía que se está editando
+                path_parts = request.META.get('HTTP_REFERER', '').split('/')
+                garantia_id = None
+                
+                try:
+                    if 'change' in path_parts:
+                        garantia_id = path_parts[path_parts.index('change') - 1]
+                        garantia_obj = garantia.Garantia.objects.get(pk=garantia_id)
+                        
+                        if garantia_obj.cliente:
+                            # Filtrar por triciclos del cliente
+                            registros_cliente = registro.Registro.objects.filter(
+                                cliente=garantia_obj.cliente,
+                                triciclo__isnull=False
+                            ).values_list('triciclo__vin', flat=True)
+                            queryset = queryset.filter(vin__in=registros_cliente)
+                        
+                        elif garantia_obj.empresa:
+                            # Filtrar por triciclos de la empresa
+                            registros_empresa = registro.Registro.objects.filter(
+                                empresa=garantia_obj.empresa,
+                                triciclo__isnull=False
+                            ).values_list('triciclo__vin', flat=True)
+                            queryset = queryset.filter(vin__in=registros_empresa)
+                        else:
+                            queryset = queryset.none()
+                    else:
+                        # Si es creación nueva, no mostrar nada
+                        queryset = queryset.none()
+                except:
+                    queryset = queryset.none()
+            
+            return queryset, use_distinct
+
     def imagen_url_display(self, obj):
         if obj.imagen:
             return format_html('<a href="{}" target="_blank">{}</a>', obj.imagen.url, obj.imagen.url)
@@ -337,7 +385,6 @@ class PowerStationPanelInlineFormset(BaseInlineFormSet):
 class PowerStationPanelInline(admin.TabularInline):
     model = power_station.PowerStationPanel
     formset = PowerStationPanelInlineFormset
-    autocomplete_fields = ['panel']
     extra = 3  # Máximo necesario
     verbose_name = "Panel"
     verbose_name_plural = "Paneles"
@@ -500,7 +547,6 @@ class RegistroAdmin(admin.ModelAdmin):
 @admin.register(registro_ps.Registro_ps, site=mi_admin_site)
 class Registro_psAdmin(admin.ModelAdmin):
     form = Registro_psForm
-    autocomplete_fields = ['cliente', 'empresa', 'power_station']
     readonly_fields = ['numero_reporte', 'tiempoR', 'tiempoR_pan', 'video_tag', 'foto_tag']
     list_display = [
         'numero_reporte', 'cliente', 'empresa', 'power_station', 'fecha_entregado',
@@ -562,7 +608,7 @@ class Registro_psAdmin(admin.ModelAdmin):
 @admin.register(garantia.Garantia, site=mi_admin_site)
 class GarantiaAdmin(admin.ModelAdmin):
     form = GarantiaForm
-    autocomplete_fields = ['cliente', 'empresa', 'triciclo', 'power_station']
+    autocomplete_fields = ['cliente', 'empresa', 'triciclo']
     readonly_fields = ['foto_tag', 'video_tag']
     search_fields = ('cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'triciclo__vin', 'power_station__sn', 'motivo', 'nombre_especialista')
     fieldsets = (
@@ -663,7 +709,6 @@ class GarantiaAdmin(admin.ModelAdmin):
 
 @admin.register(garantia_p.Garantia_P, site=mi_admin_site)
 class Garantia_PAdmin(admin.ModelAdmin):
-    autocomplete_fields = ['cliente', 'empresa', 'power_station']
     readonly_fields = ['num']
     search_fields = ('num', 'cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'power_station__sn')
     fieldsets = (
@@ -813,5 +858,3 @@ class CambioAceiteTricicloAdmin(admin.ModelAdmin):
             return format_html('<img src="{}" width="200" />', obj.foto.url)
         return "Sin imagen"
     foto_tag.short_description = "Vista previa de Foto"
-
-    autocomplete_fields = ['cliente', 'empresa', 'triciclo']
