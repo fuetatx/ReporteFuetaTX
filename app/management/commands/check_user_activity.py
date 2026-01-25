@@ -117,8 +117,8 @@ class Command(BaseCommand):
         lista_activos = []
         for usuario in usuarios_activos:
             lista_activos.append(
-                f"- Usuario: {usuario['username']} | "
-                f"Nombre: {usuario['nombre']} | "
+                f"- Usuario: {usuario['username']} "
+                f"({usuario['nombre']}) - "
                 f"Última actividad: {usuario['fecha_formateada']}"
             )
         
@@ -126,8 +126,8 @@ class Command(BaseCommand):
         lista_inactivos = []
         for usuario in usuarios_inactivos:
             lista_inactivos.append(
-                f"- Usuario: {usuario['username']} | "
-                f"Nombre: {usuario['nombre']} | "
+                f"- Usuario: {usuario['username']} "
+                f"({usuario['nombre']}) - "
                 f"Última actividad: {usuario['fecha_formateada']}"
             )
         
@@ -135,19 +135,18 @@ class Command(BaseCommand):
 REPORTE DE ACTIVIDAD DE USUARIOS
 
 Período verificado: Últimas {horas} horas
-Fecha de verificación: {timezone.now().strftime('%d/%m/%Y %H:%M')}
 
-{'='*60}
+---
 
 ✅ USUARIOS CON ACTIVIDAD RECIENTE ({len(usuarios_activos)}):
 {chr(10).join(lista_activos) if lista_activos else '  (Ninguno)'}
 
-{'='*60}
+---
 
 ⚠️ USUARIOS SIN ACTIVIDAD RECIENTE ({len(usuarios_inactivos)}):
 {chr(10).join(lista_inactivos) if lista_inactivos else '  (Ninguno)'}
 
-{'='*60}
+---
 
 RESUMEN:
 - Total de usuarios monitoreados: {len(usuarios_activos) + len(usuarios_inactivos)}
@@ -167,7 +166,7 @@ Sistema de administración de FuetaTX - Reporte automático
             asunto = f'✅ Reporte de Actividad: Todos los usuarios activos en {horas}h'
         
         # Enviar correo
-        destinatarios = ['darioroque20033@gmail.com']
+        destinatarios = ['darioroque20033@gmail.com', 'dpg27071966@gmail.com']
         
         try:
             send_mail(
