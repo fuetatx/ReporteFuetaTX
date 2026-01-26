@@ -166,7 +166,7 @@ Sistema de administración de FuetaTX - Reporte automático
             asunto = f'✅ Reporte de Actividad: Todos los usuarios activos en {horas}h'
         
         # Enviar correo
-        destinatarios = ['darioroque20033@gmail.com', 'dpg27071966@gmail.com']
+        destinatarios = ['darioroque20033@gmail.com', 'dpg27071966@gmail.com', 'ycorderoros2601@gmail.com']
         
         try:
             send_mail(
