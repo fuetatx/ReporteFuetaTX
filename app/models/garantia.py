@@ -47,6 +47,7 @@ class Garantia(models.Model):
     rodamientos_traseros = models.BooleanField("Rodamientos traseros", default=False)
     bandas_freno = models.BooleanField("Bandas de freno", default=False)
     claxon = models.BooleanField("Claxon", default=False)
+    pantalla = models.BooleanField("Pantalla", default=False)
     otros = models.TextField("Otros", blank=True, help_text="Especifica otra pieza no listada")
 
     recomendaciones=models.TextField("Algunas recomendaciones", max_length=255, null=True, blank=True)

@@ -17,6 +17,7 @@ Including another URLconf
 from django.contrib import admin
 from django.urls import path
 from app.admin import mi_admin_site
+from app.views import reporte_garantias_view, generar_reporte_garantias_excel
 
 
 from django.conf import settings
@@ -25,6 +26,8 @@ from django.urls import path
 
 urlpatterns = [
     path('admin/', mi_admin_site.urls),
+    path('reporte-garantias/', reporte_garantias_view, name='reporte_garantias'),
+    path('reporte-garantias/excel/', generar_reporte_garantias_excel, name='generar_reporte_garantias_excel'),
 ]
 
 

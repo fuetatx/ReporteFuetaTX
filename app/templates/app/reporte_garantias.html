@@ -1,0 +1,98 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Reporte de Garantías por Piezas</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: #f0f0f0;
+            padding: 40px;
+        }
+        
+        .container {
+            background: white;
+            padding: 30px;
+            max-width: 400px;
+            margin: 0 auto;
+            border: 1px solid #ccc;
+        }
+        
+        h1 {
+            font-size: 18px;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 15px;
+        }
+        
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+        }
+        
+        .form-group input[type="date"] {
+            width: 100%;
+            padding: 8px;
+            border: 1px solid #999;
+            font-size: 14px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            background: #337ab7;
+            color: white;
+            border: none;
+            cursor: pointer;
+            font-size: 14px;
+        }
+        
+        .btn:hover {
+            background: #286090;
+        }
+        
+        .back-link {
+            display: block;
+            margin-top: 20px;
+            color: #337ab7;
+            font-size: 13px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Reporte de Garantías</h1>
+        
+        <form id="reporteForm" method="GET" action="{% url 'generar_reporte_garantias_excel' %}">
+            <div class="form-group">
+                <label for="fecha_inicio">Fecha de Inicio</label>
+                <input type="date" id="fecha_inicio" name="fecha_inicio" required>
+            </div>
+            
+            <div class="form-group">
+                <label for="fecha_fin">Fecha de Fin</label>
+                <input type="date" id="fecha_fin" name="fecha_fin" required>
+            </div>
+            
+            <button type="submit" class="btn">Generar Excel</button>
+        </form>
+        
+        <a href="/admin/" class="back-link">← Volver</a>
+    </div>
+    
+    <script>
+        document.getElementById('reporteForm').addEventListener('submit', function(e) {
+            const fechaInicio = new Date(document.getElementById('fecha_inicio').value);
+            const fechaFin = new Date(document.getElementById('fecha_fin').value);
+            
+            if (fechaFin < fechaInicio) {
+                e.preventDefault();
+                alert('La fecha de fin debe ser mayor o igual a la fecha de inicio');
+            }
+        });
+    </script>
+</body>
+</html>
