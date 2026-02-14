@@ -656,6 +656,7 @@ class GarantiaAdmin(admin.ModelAdmin):
                     'rodamientos_traseros',
                     'bandas_freno',
                     'claxon',
+                    'pantalla',
                 ),
                 'otros',
             )
