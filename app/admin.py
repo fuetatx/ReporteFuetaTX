@@ -610,6 +610,7 @@ class GarantiaAdmin(admin.ModelAdmin):
     form = GarantiaForm
     autocomplete_fields = ['cliente', 'empresa', 'triciclo']
     readonly_fields = ['foto_tag', 'video_tag']
+    list_display = ['cliente', 'empresa', 'triciclo']
     search_fields = ('cliente__nombre', 'cliente__apellidos', 'empresa__nombre', 'triciclo__vin', 'power_station__sn', 'motivo', 'nombre_especialista')
     fieldsets = (
         ('Remitente', {
